@@ -1,0 +1,29 @@
+{
+  "name": "auto-buy-panel",
+  "version": "1.0.0",
+  "description": "Auto Buy Panel dengan Atlantic Payment dan Pterodactyl",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "qrcode": "^1.5.3",
+    "axios": "^1.6.0",
+    "qs": "^6.11.2",
+    "node-telegram-bot-api": "^0.64.0",
+    "bcryptjs": "^2.4.3",
+    "public-ip": "^5.0.0"
+  },
+  "keywords": [
+    "pterodactyl",
+    "payment",
+    "panel",
+    "automation"
+  ],
+  "author": "Atlantic Payment",
+  "license": "MIT"
+}
