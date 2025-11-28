@@ -201,160 +201,6 @@
             text-align: center;
         }
 
-        /* LOGIN MODAL STYLES */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background: var(--white);
-            border: 4px solid var(--dark);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: var(--shadow);
-            width: 90%;
-            max-width: 450px;
-            position: relative;
-            animation: modalAppear 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Animasi slowmo */
-        }
-
-        @keyframes modalAppear {
-            from {
-                opacity: 0;
-                transform: translateY(-30px) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--gray);
-            transition: var(--slow-transition); /* Animasi slowmo */
-        }
-
-        .close-modal:hover {
-            color: var(--error);
-            transform: rotate(90deg);
-        }
-
-        .auth-tabs {
-            display: flex;
-            margin-bottom: 30px;
-            border-bottom: 3px solid var(--dark);
-        }
-
-        .auth-tab {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            background: none;
-            border: none;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: var(--slow-transition); /* Animasi slowmo */
-            border-bottom: 3px solid transparent;
-            margin-bottom: -3px;
-        }
-
-        .auth-tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-
-        .auth-form {
-            display: none;
-        }
-
-        .auth-form.active {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: var(--dark);
-            font-size: 1.1rem;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 15px;
-            border: 3px solid var(--dark);
-            background: var(--white);
-            box-shadow: 3px 3px 0px var(--dark);
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: var(--slow-transition); /* Animasi slowmo */
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 3px 3px 0px var(--primary);
-        }
-
-        .auth-btn {
-            width: 100%;
-            padding: 15px;
-            background: var(--primary);
-            color: var(--white);
-            border: 3px solid var(--dark);
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: var(--slow-transition); /* Animasi slowmo */
-            box-shadow: 4px 4px 0px var(--dark);
-            margin-top: 10px;
-        }
-
-        .auth-btn:hover {
-            background: var(--primary-hover);
-            transform: translateY(-3px);
-        }
-
-        .auth-switch {
-            text-align: center;
-            margin-top: 20px;
-            color: var(--gray);
-        }
-
-        .auth-switch a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .auth-switch a:hover {
-            text-decoration: underline;
-        }
-
         .container {
             width: 100%;
             max-width: 1200px;
@@ -921,7 +767,6 @@
     </style>
 </head>
 <body>
-    <!-- Kode HTML lainnya tetap sama -->
     <div class="container">
         <!-- Global Message -->
         <div id="globalMessage"></div>
@@ -1108,76 +953,8 @@
         </a>
     </div>
 
-    <!-- Login Modal -->
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal-content">
-            <button class="close-modal" id="closeModal">&times;</button>
-            
-            <div class="auth-tabs">
-                <button class="auth-tab active" data-tab="login">Login</button>
-                <button class="auth-tab" data-tab="register">Daftar</button>
-            </div>
-
-            <!-- Login Form -->
-            <form class="auth-form active" id="loginForm">
-                <div class="form-group">
-                    <label class="form-label">Username</label>
-                    <input type="text" class="form-input" id="loginUsername" placeholder="Masukkan username" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <input type="password" class="form-input" id="loginPassword" placeholder="Masukkan password" required>
-                </div>
-
-                <button type="submit" class="auth-btn">
-                    <i class="fas fa-sign-in-alt"></i>
-                    Login
-                </button>
-
-                <div class="auth-switch">
-                    Belum punya akun? <a href="#" data-switch="register">Daftar di sini</a>
-                </div>
-            </form>
-
-            <!-- Register Form -->
-            <form class="auth-form" id="registerForm">
-                <div class="form-group">
-                    <label class="form-label">Nama Lengkap</label>
-                    <input type="text" class="form-input" id="registerName" placeholder="Masukkan nama lengkap" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Username</label>
-                    <input type="text" class="form-input" id="registerUsername" placeholder="Buat username" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <input type="password" class="form-input" id="registerPassword" placeholder="Buat password minimal 6 karakter" required minlength="6">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Konfirmasi Password</label>
-                    <input type="password" class="form-input" id="registerConfirmPassword" placeholder="Ulangi password" required>
-                </div>
-
-                <button type="submit" class="auth-btn">
-                    <i class="fas fa-user-plus"></i>
-                    Daftar Sekarang
-                </button>
-
-                <div class="auth-switch">
-                    Sudah punya akun? <a href="#" data-switch="login">Login di sini</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script>
-        // Script JavaScript tetap sama seperti sebelumnya
         // Global variables
-        let currentUser = null;
         let currentSection = 'home';
         let selectedProduct = null;
         let selectedSubProduct = null;
@@ -1185,219 +962,55 @@
         let checkInterval = null;
         
         // Setup coupon section
-function setupCouponSection() {
-    const couponBtn = document.querySelector('#coupon .btn-primary');
-    
-    couponBtn.addEventListener('click', async function() {
-        if (!currentUser) {
-            showMessage('Silakan login terlebih dahulu', 'error');
-            document.getElementById('loginModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            return;
-        }
-
-        const couponCode = document.querySelector('#coupon .form-input').value.trim();
-        
-        if (!couponCode) {
-            showMessage('Masukkan kode kupon', 'error');
-            return;
-        }
-
-        try {
-            couponBtn.innerHTML = '<span class="loading"></span> Mengklaim...';
-            couponBtn.disabled = true;
-
-            const response = await fetch('/api/claim-coupon', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    userId: currentUser.id,
-                    couponCode: couponCode
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                showMessage(data.message, 'success');
-                document.querySelector('#coupon .form-input').value = '';
+        function setupCouponSection() {
+            const couponBtn = document.querySelector('#coupon .btn-primary');
+            
+            couponBtn.addEventListener('click', async function() {
+                const couponCode = document.querySelector('#coupon .form-input').value.trim();
                 
-                // Update user data
-                currentUser.couponsClaimed = (currentUser.couponsClaimed || 0) + 1;
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            } else {
-                showMessage(data.error, 'error');
-            }
-
-        } catch (error) {
-            showMessage('Gagal mengklaim kupon: ' + error.message, 'error');
-        } finally {
-            couponBtn.innerHTML = '<i class="fas fa-ticket-alt"></i> Klaim Kupon';
-            couponBtn.disabled = false;
-        }
-    });
-}
-
-// Check user discount status
-async function checkUserDiscount() {
-    if (!currentUser) return null;
-
-    try {
-        const response = await fetch(`/api/user-discount/${currentUser.id}`);
-        const data = await response.json();
-        
-        if (data.success && data.hasDiscount) {
-            return data.discount;
-        }
-    } catch (error) {
-        console.error('Error checking discount:', error);
-    }
-    
-    return null;
-}
-
-// Modify the buy button setup to include discount option
-function setupBuyButton(buttonId, productType) {
-    const buyButton = document.getElementById(buttonId);
-    
-    buyButton.addEventListener('click', async () => {
-        if (!currentUser) {
-            showMessage('Silakan login terlebih dahulu', 'error');
-            document.getElementById('loginModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            return;
-        }
-
-        // Check if user has active discount
-        const activeDiscount = await checkUserDiscount();
-        let applyDiscount = false;
-
-        if (activeDiscount) {
-            const discountMessage = `Anda memiliki diskon ${activeDiscount.discountPercent}% yang aktif. Gunakan diskon ini?`;
-            applyDiscount = confirm(discountMessage);
-        }
-
-        let usernamePanel, usernameTelegram, messageToAdmin;
-
-        if (productType === 'reseller') {
-            usernameTelegram = document.getElementById('usernameTelegramReseller').value.trim();
-            messageToAdmin = document.getElementById('messageToAdminReseller').value.trim();
-            usernamePanel = '-';
-        } else if (productType === 'user-panels') {
-            if (!selectedSubProduct) {
-                showMessage('Pilih produk terlebih dahulu', 'error');
-                return;
-            }
-            usernamePanel = document.getElementById('usernamePanel').value.trim();
-            usernameTelegram = document.getElementById('usernameTelegram').value.trim();
-            messageToAdmin = document.getElementById('messageToAdmin').value.trim();
-            productType = selectedSubProduct.id;
-        } else {
-            // For admin, pt, owner, tk, ceo
-            usernamePanel = document.getElementById(`usernamePanel${productType.toUpperCase()}`).value.trim();
-            usernameTelegram = document.getElementById(`usernameTelegram${productType.toUpperCase()}`).value.trim();
-            messageToAdmin = document.getElementById(`messageToAdmin${productType.toUpperCase()}`).value.trim();
-        }
-
-        // Validation
-        if (usernameTelegram && !usernameTelegram.startsWith('@')) {
-            showMessage('Username telegram harus dimulai dengan @', 'error');
-            return;
-        }
-
-        if (productType !== 'reseller' && !usernamePanel) {
-            showMessage('Username panel harus diisi', 'error');
-            return;
-        }
-
-        if (!usernameTelegram) {
-            showMessage('Username telegram harus diisi', 'error');
-            return;
-        }
-
-        try {
-            buyButton.innerHTML = '<span class="loading"></span> Memproses...';
-            buyButton.disabled = true;
-
-            // Prepare request data
-            const requestData = {
-                productType,
-                username: usernamePanel,
-                userId: currentUser.id,
-                applyDiscount: applyDiscount
-            };
-
-            // Add additional data for specific product types
-            if (productType === 'reseller') {
-                requestData.isAdminPanel = true;
-            } else if (['admin', 'pt', 'owner', 'tk', 'ceo'].includes(productType)) {
-                requestData.isAdminPanel = true;
-            }
-
-            const response = await fetch('/api/create-order', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestData)
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                currentTransaction = {
-                    id: data.transactionId,
-                    reff: data.reff,
-                    productType: data.productType,
-                    productName: selectedSubProduct ? selectedSubProduct.name : selectedProduct.name,
-                    usernamePanel: usernamePanel,
-                    usernameTelegram: usernameTelegram,
-                    messageToAdmin: messageToAdmin,
-                    originalPrice: data.originalPrice,
-                    finalPrice: data.finalPrice,
-                    discountApplied: data.discountApplied || 0,
-                    status: 'pending',
-                    atlanticId: data.atlanticId
-                };
-
-                // Show payment section
-                showPaymentSection(data);
-
-                let successMessage = 'Pesanan berhasil dibuat! Scan QR Code untuk pembayaran';
-                if (data.discountApplied > 0) {
-                    successMessage += ` (Diskon Rp ${data.discountApplied.toLocaleString('id-ID')} diterapkan)`;
+                if (!couponCode) {
+                    showMessage('Masukkan kode kupon', 'error');
+                    return;
                 }
-                showMessage(successMessage, 'success');
 
-            } else {
-                showMessage('Gagal membuat pesanan: ' + data.error, 'error');
-            }
+                try {
+                    couponBtn.innerHTML = '<span class="loading"></span> Mengklaim...';
+                    couponBtn.disabled = true;
 
-        } catch (error) {
-            showMessage('Gagal membuat pesanan: ' + error.message, 'error');
-        } finally {
-            buyButton.innerHTML = '<i class="fas fa-shopping-cart"></i> Beli Sekarang';
-            buyButton.disabled = false;
+                    const response = await fetch('/api/claim-coupon', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            couponCode: couponCode
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showMessage(data.message, 'success');
+                        document.querySelector('#coupon .form-input').value = '';
+                    } else {
+                        showMessage(data.error, 'error');
+                    }
+
+                } catch (error) {
+                    showMessage('Gagal mengklaim kupon: ' + error.message, 'error');
+                } finally {
+                    couponBtn.innerHTML = '<i class="fas fa-ticket-alt"></i> Klaim Kupon';
+                    couponBtn.disabled = false;
+                }
+            });
         }
-    });
-}
-
-// Initialize coupon section when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // ... kode existing lainnya ...
-    setupCouponSection();
-});
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             setupNavigation();
-            setupAuthModal();
             setupProductButtons();
             setupMobileMenu();
-            checkLoginStatus();
-            setupCouponSection
+            setupCouponSection();
         });
 
         // Setup mobile menu
@@ -1442,20 +1055,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Check login status
-        function checkLoginStatus() {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                updateLoginUI();
-            }
-        }
-
-        // Update login UI
-        function updateLoginUI() {
-            // Update UI jika diperlukan
-        }
-
         // Navigation setup
         function setupNavigation() {
             const mobileMenuItems = document.querySelectorAll('.mobile-menu-item');
@@ -1473,341 +1072,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         showSection(section);
                     }
                 });
-            });
-        }
-
-        // Auth modal setup
-        function setupAuthModal() {
-            const loginModal = document.getElementById('loginModal');
-            const closeModal = document.getElementById('closeModal');
-            const authTabs = document.querySelectorAll('.auth-tab');
-            const authForms = document.querySelectorAll('.auth-form');
-            const switchLinks = document.querySelectorAll('.auth-switch a');
-
-            // Close modal
-            closeModal.addEventListener('click', () => {
-                loginModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            });
-
-            // Close modal when clicking outside
-            loginModal.addEventListener('click', (e) => {
-                if (e.target === loginModal) {
-                    loginModal.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
-            });
-
-            // Switch between login and register tabs
-            authTabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const targetTab = tab.getAttribute('data-tab');
-                    
-                    // Update active tab
-                    authTabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    
-                    // Update active form
-                    authForms.forEach(form => {
-                        form.classList.remove('active');
-                        if (form.id === `${targetTab}Form`) {
-                            form.classList.add('active');
-                        }
-                    });
-                });
-            });
-
-            // Switch between login and register via links
-            switchLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const targetTab = link.getAttribute('data-switch');
-                    
-                    // Update active tab
-                    authTabs.forEach(t => t.classList.remove('active'));
-                    document.querySelector(`.auth-tab[data-tab="${targetTab}"]`).classList.add('active');
-                    
-                    // Update active form
-                    authForms.forEach(form => {
-                        form.classList.remove('active');
-                        if (form.id === `${targetTab}Form`) {
-                            form.classList.add('active');
-                        }
-                    });
-                });
-            });
-
-            // Handle login form submission
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const username = document.getElementById('loginUsername').value;
-    const password = document.getElementById('loginPassword').value;
-    const loginBtn = e.target.querySelector('button[type="submit"]');
-    
-    try {
-        loginBtn.innerHTML = '<span class="loading"></span> Logging in...';
-        loginBtn.disabled = true;
-        
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                username: username,
-                password: password
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            currentUser = data.user;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateLoginUI();
-            showMessage('Login berhasil!', 'success');
-            
-            // Close modal
-            loginModal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            
-            // Reset form
-            e.target.reset();
-        } else {
-            showMessage('Login gagal: ' + data.error, 'error');
-        }
-        
-    } catch (error) {
-        showMessage('Login gagal: ' + error.message, 'error');
-    } finally {
-        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-        loginBtn.disabled = false;
-    }
-});
-
-// Handle register form submission
-document.getElementById('registerForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const name = document.getElementById('registerName').value;
-    const username = document.getElementById('registerUsername').value;
-    const password = document.getElementById('registerPassword').value;
-    const confirmPassword = document.getElementById('registerConfirmPassword').value;
-    const registerBtn = e.target.querySelector('button[type="submit"]');
-    
-    if (password !== confirmPassword) {
-        showMessage('Password dan konfirmasi password tidak cocok', 'error');
-        return;
-    }
-    
-    if (password.length < 6) {
-        showMessage('Password minimal 6 karakter', 'error');
-        return;
-    }
-    
-    // Basic username validation
-    if (username.length < 3) {
-        showMessage('Username minimal 3 karakter', 'error');
-        return;
-    }
-    
-    try {
-        registerBtn.innerHTML = '<span class="loading"></span> Mendaftar...';
-        registerBtn.disabled = true;
-        
-        const response = await fetch('/api/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                name: name,
-                username: username,
-                password: password
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            currentUser = data.user;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateLoginUI();
-            showMessage('Pendaftaran berhasil!', 'success');
-            
-            // Close modal
-            loginModal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            
-            // Reset form
-            e.target.reset();
-        } else {
-            showMessage('Pendaftaran gagal: ' + data.error, 'error');
-        }
-        
-    } catch (error) {
-        showMessage('Pendaftaran gagal: ' + error.message, 'error');
-    } finally {
-        registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> Daftar Sekarang';
-        registerBtn.disabled = false;
-    }
-});
-
-// Update login UI function
-function updateLoginUI() {
-    const mobileMenu = document.getElementById('mobileMenu');
-    
-    if (currentUser) {
-        // Add user menu items
-        if (!document.getElementById('userProfileItem')) {
-            const userProfileItem = document.createElement('a');
-            userProfileItem.href = '#';
-            userProfileItem.className = 'mobile-menu-item';
-            userProfileItem.id = 'userProfileItem';
-            userProfileItem.innerHTML = '<i class="fas fa-user"></i> Profil Saya';
-            userProfileItem.setAttribute('data-section', 'profile');
-            
-            const logoutItem = document.createElement('a');
-            logoutItem.href = '#';
-            logoutItem.className = 'mobile-menu-item';
-            logoutItem.id = 'logoutItem';
-            logoutItem.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
-            
-            mobileMenu.appendChild(userProfileItem);
-            mobileMenu.appendChild(logoutItem);
-            
-            // Add logout handler
-            logoutItem.addEventListener('click', function(e) {
-                e.preventDefault();
-                currentUser = null;
-                localStorage.removeItem('currentUser');
-                updateLoginUI();
-                showMessage('Logout berhasil!', 'success');
-                
-                // Remove user menu items
-                userProfileItem.remove();
-                logoutItem.remove();
-            });
-        }
-    }
-}
-
-// Update validation untuk username telegram (jangan ganggu login)
-function setupBuyButton(buttonId, productType) {
-    const buyButton = document.getElementById(buttonId);
-    
-    buyButton.addEventListener('click', async () => {
-        if (!currentUser) {
-            showMessage('Silakan login terlebih dahulu', 'error');
-            document.getElementById('loginModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            return;
-        }
-
-        let usernamePanel, usernameTelegram, messageToAdmin;
-
-        if (productType === 'reseller') {
-            usernameTelegram = document.getElementById('usernameTelegramReseller').value.trim();
-            messageToAdmin = document.getElementById('messageToAdminReseller').value.trim();
-            usernamePanel = '-';
-        } else if (productType === 'user-panels') {
-            if (!selectedSubProduct) {
-                showMessage('Pilih produk terlebih dahulu', 'error');
-                return;
-            }
-            usernamePanel = document.getElementById('usernamePanel').value.trim();
-            usernameTelegram = document.getElementById('usernameTelegram').value.trim();
-            messageToAdmin = document.getElementById('messageToAdmin').value.trim();
-            productType = selectedSubProduct.id;
-        } else {
-            // For admin, pt, owner, tk, ceo
-            usernamePanel = document.getElementById(`usernamePanel${productType.toUpperCase()}`).value.trim();
-            usernameTelegram = document.getElementById(`usernameTelegram${productType.toUpperCase()}`).value.trim();
-            messageToAdmin = document.getElementById(`messageToAdmin${productType.toUpperCase()}`).value.trim();
-        }
-
-        // Validation - hanya validasi untuk pembelian, bukan login
-        if (usernameTelegram && !usernameTelegram.startsWith('@')) {
-            showMessage('Username telegram harus dimulai dengan @', 'error');
-            return;
-        }
-
-        if (productType !== 'reseller' && !usernamePanel) {
-            showMessage('Username panel harus diisi', 'error');
-            return;
-        }
-
-        if (!usernameTelegram) {
-            showMessage('Username telegram harus diisi', 'error');
-            return;
-        }
-
-        // Continue with purchase process...
-        // [Kode pembelian yang sudah ada]
-    });
-}
-
-            // Handle register form submission
-            document.getElementById('registerForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const name = document.getElementById('registerName').value;
-                const username = document.getElementById('registerUsername').value;
-                const password = document.getElementById('registerPassword').value;
-                const confirmPassword = document.getElementById('registerConfirmPassword').value;
-                const registerBtn = e.target.querySelector('button[type="submit"]');
-                
-                if (password !== confirmPassword) {
-                    showMessage('Password dan konfirmasi password tidak cocok', 'error');
-                    return;
-                }
-                
-                if (password.length < 6) {
-                    showMessage('Password minimal 6 karakter', 'error');
-                    return;
-                }
-                
-                try {
-                    registerBtn.innerHTML = '<span class="loading"></span> Mendaftar...';
-                    registerBtn.disabled = true;
-                    
-                    const response = await fetch('/api/register', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            name: name,
-                            email: username,
-                            password: password
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        currentUser = data.user;
-                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                        updateLoginUI();
-                        showMessage('Pendaftaran berhasil!', 'success');
-                        
-                        // Close modal
-                        loginModal.style.display = 'none';
-                        document.body.style.overflow = 'auto';
-                        
-                        // Reset form
-                        e.target.reset();
-                    } else {
-                        showMessage('Pendaftaran gagal: ' + data.error, 'error');
-                    }
-                    
-                } catch (error) {
-                    showMessage('Pendaftaran gagal: ' + error.message, 'error');
-                } finally {
-                    registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> Daftar Sekarang';
-                    registerBtn.disabled = false;
-                }
             });
         }
 
@@ -2232,13 +1496,6 @@ function setupBuyButton(buttonId, productType) {
             const buyButton = document.getElementById(buttonId);
             
             buyButton.addEventListener('click', async () => {
-                if (!currentUser) {
-                    showMessage('Silakan login terlebih dahulu', 'error');
-                    document.getElementById('loginModal').style.display = 'flex';
-                    document.body.style.overflow = 'hidden';
-                    return;
-                }
-
                 let usernamePanel, usernameTelegram, messageToAdmin;
 
                 if (productType === 'reseller') {
@@ -2284,8 +1541,7 @@ function setupBuyButton(buttonId, productType) {
                     // Prepare request data
                     const requestData = {
                         productType,
-                        username: usernamePanel,
-                        userId: currentUser.id
+                        username: usernamePanel
                     };
 
                     // Add additional data for specific product types
@@ -2314,7 +1570,6 @@ function setupBuyButton(buttonId, productType) {
                             usernamePanel: usernamePanel,
                             usernameTelegram: usernameTelegram,
                             messageToAdmin: messageToAdmin,
-                            originalPrice: data.originalPrice,
                             finalPrice: data.finalPrice,
                             status: 'pending',
                             atlanticId: data.atlanticId
