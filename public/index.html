@@ -1538,53 +1538,215 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // Handle login form submission
-            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+    const loginBtn = e.target.querySelector('button[type="submit"]');
+    
+    try {
+        loginBtn.innerHTML = '<span class="loading"></span> Logging in...';
+        loginBtn.disabled = true;
+        
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            currentUser = data.user;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            updateLoginUI();
+            showMessage('Login berhasil!', 'success');
+            
+            // Close modal
+            loginModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            // Reset form
+            e.target.reset();
+        } else {
+            showMessage('Login gagal: ' + data.error, 'error');
+        }
+        
+    } catch (error) {
+        showMessage('Login gagal: ' + error.message, 'error');
+    } finally {
+        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+        loginBtn.disabled = false;
+    }
+});
+
+// Handle register form submission
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const name = document.getElementById('registerName').value;
+    const username = document.getElementById('registerUsername').value;
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('registerConfirmPassword').value;
+    const registerBtn = e.target.querySelector('button[type="submit"]');
+    
+    if (password !== confirmPassword) {
+        showMessage('Password dan konfirmasi password tidak cocok', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showMessage('Password minimal 6 karakter', 'error');
+        return;
+    }
+    
+    // Basic username validation
+    if (username.length < 3) {
+        showMessage('Username minimal 3 karakter', 'error');
+        return;
+    }
+    
+    try {
+        registerBtn.innerHTML = '<span class="loading"></span> Mendaftar...';
+        registerBtn.disabled = true;
+        
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                username: username,
+                password: password
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            currentUser = data.user;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            updateLoginUI();
+            showMessage('Pendaftaran berhasil!', 'success');
+            
+            // Close modal
+            loginModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            // Reset form
+            e.target.reset();
+        } else {
+            showMessage('Pendaftaran gagal: ' + data.error, 'error');
+        }
+        
+    } catch (error) {
+        showMessage('Pendaftaran gagal: ' + error.message, 'error');
+    } finally {
+        registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> Daftar Sekarang';
+        registerBtn.disabled = false;
+    }
+});
+
+// Update login UI function
+function updateLoginUI() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    
+    if (currentUser) {
+        // Add user menu items
+        if (!document.getElementById('userProfileItem')) {
+            const userProfileItem = document.createElement('a');
+            userProfileItem.href = '#';
+            userProfileItem.className = 'mobile-menu-item';
+            userProfileItem.id = 'userProfileItem';
+            userProfileItem.innerHTML = '<i class="fas fa-user"></i> Profil Saya';
+            userProfileItem.setAttribute('data-section', 'profile');
+            
+            const logoutItem = document.createElement('a');
+            logoutItem.href = '#';
+            logoutItem.className = 'mobile-menu-item';
+            logoutItem.id = 'logoutItem';
+            logoutItem.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+            
+            mobileMenu.appendChild(userProfileItem);
+            mobileMenu.appendChild(logoutItem);
+            
+            // Add logout handler
+            logoutItem.addEventListener('click', function(e) {
                 e.preventDefault();
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                updateLoginUI();
+                showMessage('Logout berhasil!', 'success');
                 
-                const username = document.getElementById('loginUsername').value;
-                const password = document.getElementById('loginPassword').value;
-                const loginBtn = e.target.querySelector('button[type="submit"]');
-                
-                try {
-                    loginBtn.innerHTML = '<span class="loading"></span> Logging in...';
-                    loginBtn.disabled = true;
-                    
-                    const response = await fetch('/api/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            email: username,
-                            password: password
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        currentUser = data.user;
-                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                        updateLoginUI();
-                        showMessage('Login berhasil!', 'success');
-                        
-                        // Close modal
-                        loginModal.style.display = 'none';
-                        document.body.style.overflow = 'auto';
-                        
-                        // Reset form
-                        e.target.reset();
-                    } else {
-                        showMessage('Login gagal: ' + data.error, 'error');
-                    }
-                    
-                } catch (error) {
-                    showMessage('Login gagal: ' + error.message, 'error');
-                } finally {
-                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-                    loginBtn.disabled = false;
-                }
+                // Remove user menu items
+                userProfileItem.remove();
+                logoutItem.remove();
             });
+        }
+    }
+}
+
+// Update validation untuk username telegram (jangan ganggu login)
+function setupBuyButton(buttonId, productType) {
+    const buyButton = document.getElementById(buttonId);
+    
+    buyButton.addEventListener('click', async () => {
+        if (!currentUser) {
+            showMessage('Silakan login terlebih dahulu', 'error');
+            document.getElementById('loginModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            return;
+        }
+
+        let usernamePanel, usernameTelegram, messageToAdmin;
+
+        if (productType === 'reseller') {
+            usernameTelegram = document.getElementById('usernameTelegramReseller').value.trim();
+            messageToAdmin = document.getElementById('messageToAdminReseller').value.trim();
+            usernamePanel = '-';
+        } else if (productType === 'user-panels') {
+            if (!selectedSubProduct) {
+                showMessage('Pilih produk terlebih dahulu', 'error');
+                return;
+            }
+            usernamePanel = document.getElementById('usernamePanel').value.trim();
+            usernameTelegram = document.getElementById('usernameTelegram').value.trim();
+            messageToAdmin = document.getElementById('messageToAdmin').value.trim();
+            productType = selectedSubProduct.id;
+        } else {
+            // For admin, pt, owner, tk, ceo
+            usernamePanel = document.getElementById(`usernamePanel${productType.toUpperCase()}`).value.trim();
+            usernameTelegram = document.getElementById(`usernameTelegram${productType.toUpperCase()}`).value.trim();
+            messageToAdmin = document.getElementById(`messageToAdmin${productType.toUpperCase()}`).value.trim();
+        }
+
+        // Validation - hanya validasi untuk pembelian, bukan login
+        if (usernameTelegram && !usernameTelegram.startsWith('@')) {
+            showMessage('Username telegram harus dimulai dengan @', 'error');
+            return;
+        }
+
+        if (productType !== 'reseller' && !usernamePanel) {
+            showMessage('Username panel harus diisi', 'error');
+            return;
+        }
+
+        if (!usernameTelegram) {
+            showMessage('Username telegram harus diisi', 'error');
+            return;
+        }
+
+        // Continue with purchase process...
+        // [Kode pembelian yang sudah ada]
+    });
+}
 
             // Handle register form submission
             document.getElementById('registerForm').addEventListener('submit', async (e) => {
