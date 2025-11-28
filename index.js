@@ -274,12 +274,57 @@ bot.onText(/\/listpromos/, async (msg) => {
 
 // API Routes untuk User Management
 
-// Register user baru
-app.post('/api/register', async (req, res) => {
-  const { name, email, password } = req.body;
+// Login user dengan username atau email
+app.post('/api/login', async (req, res) => {
+  const { username, password, email } = req.body;
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ error: 'Nama, email, dan password diperlukan' });
+  // Support both username and email login
+  const loginIdentifier = username || email;
+
+  if (!loginIdentifier || !password) {
+    return res.status(400).json({ error: 'Username/email dan password diperlukan' });
+  }
+
+  try {
+    const userData = loadUserData();
+    
+    // Cari user by username atau email
+    const user = userData.users.find(user => 
+      user.username === loginIdentifier || user.email === loginIdentifier
+    );
+    
+    if (!user) {
+      return res.status(400).json({ error: 'Username/email atau password salah' });
+    }
+
+    const isPasswordValid = await comparePassword(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ error: 'Username/email atau password salah' });
+    }
+
+    user.lastLogin = new Date().toISOString();
+    saveUserData(userData);
+
+    console.log(`🔐 USER LOGIN: ${user.name} (${user.username || user.email}) - ID: ${user.id}`);
+
+    const { password: _, ...userWithoutPassword } = user;
+    res.json({
+      success: true,
+      message: 'Login berhasil!',
+      user: userWithoutPassword
+    });
+  } catch (error) {
+    console.error('Error logging in user:', error);
+    res.status(500).json({ error: 'Terjadi kesalahan server' });
+  }
+});
+
+// Update register endpoint untuk include username
+app.post('/api/register', async (req, res) => {
+  const { name, username, email, password } = req.body;
+
+  if (!name || !username || !password) {
+    return res.status(400).json({ error: 'Nama, username, dan password diperlukan' });
   }
 
   if (password.length < 6) {
@@ -289,9 +334,13 @@ app.post('/api/register', async (req, res) => {
   try {
     const userData = loadUserData();
     
-    const existingUser = userData.users.find(user => user.email === email);
+    // Check if username already exists
+    const existingUser = userData.users.find(user => 
+      user.username === username || user.email === (email || username)
+    );
+    
     if (existingUser) {
-      return res.status(400).json({ error: 'Email sudah terdaftar' });
+      return res.status(400).json({ error: 'Username sudah terdaftar' });
     }
 
     const userId = generateUserId();
@@ -300,7 +349,8 @@ app.post('/api/register', async (req, res) => {
     const newUser = {
       id: userId,
       name,
-      email,
+      username,
+      email: email || `${username}@panel.com`, // Default email if not provided
       password: hashedPassword,
       role: 'member',
       createdAt: new Date().toISOString(),
@@ -313,7 +363,7 @@ app.post('/api/register', async (req, res) => {
     userData.users.push(newUser);
     
     if (saveUserData(userData)) {
-      console.log(`👤 USER REGISTERED: ${name} (${email}) - ID: ${userId}`);
+      console.log(`👤 USER REGISTERED: ${name} (${username}) - ID: ${userId}`);
       
       const { password: _, ...userWithoutPassword } = newUser;
       res.json({
@@ -326,44 +376,6 @@ app.post('/api/register', async (req, res) => {
     }
   } catch (error) {
     console.error('Error registering user:', error);
-    res.status(500).json({ error: 'Terjadi kesalahan server' });
-  }
-});
-
-// Login user
-app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email dan password diperlukan' });
-  }
-
-  try {
-    const userData = loadUserData();
-    
-    const user = userData.users.find(user => user.email === email);
-    if (!user) {
-      return res.status(400).json({ error: 'Email atau password salah' });
-    }
-
-    const isPasswordValid = await comparePassword(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ error: 'Email atau password salah' });
-    }
-
-    user.lastLogin = new Date().toISOString();
-    saveUserData(userData);
-
-    console.log(`🔐 USER LOGIN: ${user.name} (${user.email}) - ID: ${user.id}`);
-
-    const { password: _, ...userWithoutPassword } = user;
-    res.json({
-      success: true,
-      message: 'Login berhasil!',
-      user: userWithoutPassword
-    });
-  } catch (error) {
-    console.error('Error logging in user:', error);
     res.status(500).json({ error: 'Terjadi kesalahan server' });
   }
 });
