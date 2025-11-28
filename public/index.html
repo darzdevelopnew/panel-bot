@@ -773,17 +773,21 @@
 
         <!-- Home Section -->
         <section id="home" class="section active">
-            <div class="home-section">
-                <div class="profile-image">
-                    <i class="fas fa-user"></i>
-                </div>
-                <h1 class="profile-name">¡m dars</h1>
-                <p class="profile-description">
-                    Selamat datang di ¡m dars! Kami menyediakan berbagai jenis panel dengan kualitas terbaik 
-                    dan harga terjangkau. Layanan cepat, aman, dan terpercaya. Silakan jelajahi produk-produk kami 
-                    dan temukan yang sesuai dengan kebutuhan Anda.
-                </p>
-            </div>
+            <!-- Di dalam home section, tambahkan setelah profile-description -->
+<div class="home-section">
+    <div class="profile-image">
+        <i class="fas fa-user"></i>
+    </div>
+    <h1 class="profile-name">¡m dars</h1>
+    <p class="profile-description">
+        Selamat datang di ¡m dars! Kami menyediakan berbagai jenis panel dengan kualitas terbaik 
+        dan harga terjangkau. Layanan cepat, aman, dan terpercaya. Silakan jelajahi produk-produk kami 
+        dan temukan yang sesuai dengan kebutuhan Anda.
+    </p>
+    
+    <!-- TAMBAHKAN BAGIAN INI UNTUK MENAMPILKAN ERROR -->
+    <div id="homeMessage" style="margin-top: 20px; max-width: 600px; margin-left: auto; margin-right: auto;"></div>
+</div>
         </section>
 
         <!-- Products Section -->
@@ -961,6 +965,24 @@
         let currentTransaction = null;
         let checkInterval = null;
         
+        // Tambahkan fungsi ini di dalam script section
+function showHomeMessage(message, type = 'error') {
+    const homeMessageDiv = document.getElementById('homeMessage');
+    homeMessageDiv.innerHTML = `
+        <div class="message ${type}" style="animation: fadeIn 0.6s ease;">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+            ${message}
+        </div>
+    `;
+    
+    // Auto hide setelah 5 detik untuk success messages
+    if (type === 'success') {
+        setTimeout(() => {
+            homeMessageDiv.innerHTML = '';
+        }, 5000);
+    }
+}
+
         // Setup coupon section
         function setupCouponSection() {
             const couponBtn = document.querySelector('#coupon .btn-primary');
