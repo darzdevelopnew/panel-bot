@@ -15,7 +15,6 @@
     "axios": "^1.6.0",
     "qs": "^6.11.2",
     "node-telegram-bot-api": "^0.64.0",
-    "bcryptjs": "^2.4.3",
     "public-ip": "^5.0.0"
   },
   "keywords": [

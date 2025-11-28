@@ -9,7 +9,6 @@ import axios from 'axios';
 import qs from 'qs';
 import settings from './settings.js';
 import fs from 'fs';
-import bcrypt from 'bcryptjs';
 import publicIp from 'public-ip';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -27,9 +26,7 @@ app.use(express.static('public'));
 const activeTransactions = new Map();
 
 // File untuk menyimpan data
-const USER_DATA_FILE = './database/dataLogin.json';
 const PROMO_CODES_FILE = './database/promoCodes.json';
-const USER_DISCOUNTS_FILE = './database/userDiscounts.json';
 
 // Buat instance bot
 const bot = new TelegramBot(settings.telegramBotToken, { polling: true });
@@ -65,16 +62,6 @@ function saveData(filePath, data) {
   }
 }
 
-// Load user data
-function loadUserData() {
-  return loadData(USER_DATA_FILE, { users: [] });
-}
-
-// Save user data
-function saveUserData(userData) {
-  return saveData(USER_DATA_FILE, userData);
-}
-
 // Load promo codes
 function loadPromoCodes() {
   return loadData(PROMO_CODES_FILE, { promos: [] });
@@ -83,16 +70,6 @@ function loadPromoCodes() {
 // Save promo codes
 function savePromoCodes(promoData) {
   return saveData(PROMO_CODES_FILE, promoData);
-}
-
-// Load user discounts
-function loadUserDiscounts() {
-  return loadData(USER_DISCOUNTS_FILE, { discounts: [] });
-}
-
-// Save user discounts
-function saveUserDiscounts(discountData) {
-  return saveData(USER_DISCOUNTS_FILE, discountData);
 }
 
 // Helper functions
@@ -105,10 +82,6 @@ function generatePassword(length = 8) {
   return pass;
 }
 
-function generateUserId() {
-  return 'USER_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-}
-
 function generateCouponCode() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let code = "";
@@ -118,17 +91,6 @@ function generateCouponCode() {
   return code;
 }
 
-// Hash password
-async function hashPassword(password) {
-  const saltRounds = 10;
-  return await bcrypt.hash(password, saltRounds);
-}
-
-// Compare password
-async function comparePassword(password, hash) {
-  return await bcrypt.compare(password, hash);
-}
-
 // Command: /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
@@ -136,7 +98,6 @@ bot.onText(/\/start/, (msg) => {
 🎉 *Selamat Datang di Bot Panel!*
 
 *Perintah yang tersedia:*
-/listusers - Lihat semua users
 /addpromo - Tambah kupon promo
 /listpromos - Lihat semua kupon
 
@@ -144,50 +105,6 @@ Bot ini digunakan untuk monitoring sistem panel otomatis.
   `;
 
   bot.sendMessage(chatId, welcomeText, { parse_mode: 'Markdown' });
-});
-
-// Command: /listusers - List semua users
-bot.onText(/\/listusers/, async (msg) => {
-  const chatId = msg.chat.id;
-  
-  if (msg.from.id.toString() !== settings.adminTelegramId) {
-    return bot.sendMessage(chatId, '❌ Maaf, hanya admin yang bisa menggunakan command ini.');
-  }
-
-  try {
-    const userData = loadUserData();
-    const users = userData.users || [];
-    
-    if (users.length === 0) {
-      return bot.sendMessage(chatId, '📭 Tidak ada user yang terdaftar.');
-    }
-
-    let message = `📋 *DAFTAR USER (${users.length})*\n\n`;
-    
-    users.forEach((user, index) => {
-      message += `👤 *${user.name}*\n`;
-      message += `🆔 ${user.id}\n`;
-      message += `📧 ${user.email}\n`;
-      message += `🎯 Role: ${user.role}\n`;
-      message += `📅 Bergabung: ${new Date(user.createdAt).toLocaleDateString('id-ID')}\n`;
-      message += `🛒 Total Order: ${user.orderCount || 0}\n`;
-      message += `💰 Total Belanja: Rp ${(user.totalSpent || 0).toLocaleString('id-ID')}\n\n`;
-    });
-
-    if (message.length > 4096) {
-      const mid = message.lastIndexOf('\n\n', 4000);
-      const firstPart = message.substring(0, mid);
-      const secondPart = message.substring(mid);
-      
-      bot.sendMessage(chatId, firstPart, { parse_mode: 'Markdown' });
-      bot.sendMessage(chatId, secondPart, { parse_mode: 'Markdown' });
-    } else {
-      bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
-    }
-  } catch (error) {
-    console.error('Error listing users:', error);
-    bot.sendMessage(chatId, `❌ Error: ${error.message}`);
-  }
 });
 
 // Command: /addpromo - Tambah kupon promo
@@ -272,176 +189,18 @@ bot.onText(/\/listpromos/, async (msg) => {
   }
 });
 
-// API Routes untuk User Management
-
-// Login user dengan username atau email
-app.post('/api/login', async (req, res) => {
-  const { username, password, email } = req.body;
-
-  // Support both username and email login
-  const loginIdentifier = username || email;
-
-  if (!loginIdentifier || !password) {
-    return res.status(400).json({ error: 'Username/email dan password diperlukan' });
-  }
-
-  try {
-    const userData = loadUserData();
-    
-    // Cari user by username atau email
-    const user = userData.users.find(user => 
-      user.username === loginIdentifier || user.email === loginIdentifier
-    );
-    
-    if (!user) {
-      return res.status(400).json({ error: 'Username/email atau password salah' });
-    }
-
-    const isPasswordValid = await comparePassword(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ error: 'Username/email atau password salah' });
-    }
-
-    user.lastLogin = new Date().toISOString();
-    saveUserData(userData);
-
-    console.log(`🔐 USER LOGIN: ${user.name} (${user.username || user.email}) - ID: ${user.id}`);
-
-    const { password: _, ...userWithoutPassword } = user;
-    res.json({
-      success: true,
-      message: 'Login berhasil!',
-      user: userWithoutPassword
-    });
-  } catch (error) {
-    console.error('Error logging in user:', error);
-    res.status(500).json({ error: 'Terjadi kesalahan server' });
-  }
-});
-
-// Update register endpoint untuk include username
-app.post('/api/register', async (req, res) => {
-  const { name, username, email, password } = req.body;
-
-  if (!name || !username || !password) {
-    return res.status(400).json({ error: 'Nama, username, dan password diperlukan' });
-  }
-
-  if (password.length < 6) {
-    return res.status(400).json({ error: 'Password minimal 6 karakter' });
-  }
-
-  try {
-    const userData = loadUserData();
-    
-    // Check if username already exists
-    const existingUser = userData.users.find(user => 
-      user.username === username || user.email === (email || username)
-    );
-    
-    if (existingUser) {
-      return res.status(400).json({ error: 'Username sudah terdaftar' });
-    }
-
-    const userId = generateUserId();
-    const hashedPassword = await hashPassword(password);
-    
-    const newUser = {
-      id: userId,
-      name,
-      username,
-      email: email || `${username}@panel.com`, // Default email if not provided
-      password: hashedPassword,
-      role: 'member',
-      createdAt: new Date().toISOString(),
-      lastLogin: new Date().toISOString(),
-      orderCount: 0,
-      totalSpent: 0,
-      couponsClaimed: 0
-    };
-
-    userData.users.push(newUser);
-    
-    if (saveUserData(userData)) {
-      console.log(`👤 USER REGISTERED: ${name} (${username}) - ID: ${userId}`);
-      
-      const { password: _, ...userWithoutPassword } = newUser;
-      res.json({
-        success: true,
-        message: 'Registrasi berhasil!',
-        user: userWithoutPassword
-      });
-    } else {
-      res.status(500).json({ error: 'Gagal menyimpan data user' });
-    }
-  } catch (error) {
-    console.error('Error registering user:', error);
-    res.status(500).json({ error: 'Terjadi kesalahan server' });
-  }
-});
-
-// Get user by ID
-app.get('/api/user/:userId', (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    const userData = loadUserData();
-    const user = userData.users.find(user => user.id === userId);
-    
-    if (!user) {
-      return res.status(404).json({ error: 'User tidak ditemukan' });
-    }
-
-    const { password: _, ...userWithoutPassword } = user;
-    res.json({
-      success: true,
-      user: userWithoutPassword
-    });
-  } catch (error) {
-    console.error('Error getting user:', error);
-    res.status(500).json({ error: 'Terjadi kesalahan server' });
-  }
-});
-
-// Get semua users (untuk admin)
-app.get('/api/users', (req, res) => {
-  try {
-    const userData = loadUserData();
-    
-    const usersWithoutPassword = userData.users.map(user => {
-      const { password, ...userWithoutPassword } = user;
-      return userWithoutPassword;
-    });
-
-    res.json({
-      success: true,
-      users: usersWithoutPassword
-    });
-  } catch (error) {
-    console.error('Error getting users:', error);
-    res.status(500).json({ error: 'Terjadi kesalahan server' });
-  }
-});
-
 // API untuk Kupon Management
 
 // Klaim kupon
 app.post('/api/claim-coupon', async (req, res) => {
-  const { userId, couponCode } = req.body;
+  const { couponCode } = req.body;
 
-  if (!userId || !couponCode) {
-    return res.status(400).json({ error: 'User ID dan kode kupon diperlukan' });
+  if (!couponCode) {
+    return res.status(400).json({ error: 'Kode kupon diperlukan' });
   }
 
   try {
-    const userData = loadUserData();
     const promoData = loadPromoCodes();
-    const discountData = loadUserDiscounts();
-
-    const user = userData.users.find(user => user.id === userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User tidak ditemukan' });
-    }
 
     const promo = promoData.promos.find(p => 
       p.code === couponCode.toUpperCase() && p.isActive
@@ -459,40 +218,13 @@ app.post('/api/claim-coupon', async (req, res) => {
       return res.status(400).json({ error: 'Kupon sudah mencapai batas penggunaan' });
     }
 
-    const existingDiscount = discountData.discounts.find(d => 
-      d.userId === userId && d.couponCode === couponCode.toUpperCase()
-    );
-
-    if (existingDiscount) {
-      return res.status(400).json({ error: 'Anda sudah mengklaim kupon ini sebelumnya' });
-    }
-
-    const userDiscount = {
-      id: `DISC_${Date.now()}`,
-      userId: userId,
-      couponCode: couponCode.toUpperCase(),
-      discountPercent: promo.discount,
-      claimedAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      isUsed: false
-    };
-
-    discountData.discounts.push(userDiscount);
-    
     promo.usedCount += 1;
-    
-    user.couponsClaimed = (user.couponsClaimed || 0) + 1;
-
-    saveUserDiscounts(discountData);
     savePromoCodes(promoData);
-    saveUserData(userData);
 
-    console.log(`🎫 COUPON CLAIMED: ${user.name} (${user.email}) - Kupon: ${couponCode}`);
+    console.log(`🎫 COUPON CLAIMED: Kupon: ${couponCode}`);
 
     bot.sendMessage(settings.adminTelegramId, 
       `🎫 *KUPON DIKLAIM!*\n\n` +
-      `👤 User: ${user.name}\n` +
-      `📧 Email: ${user.email}\n` +
       `🎫 Kode: ${couponCode}\n` +
       `💰 Diskon: ${promo.discount}%\n` +
       `📊 Penggunaan: ${promo.usedCount}/${promo.maxUses}`,
@@ -502,70 +234,11 @@ app.post('/api/claim-coupon', async (req, res) => {
     res.json({
       success: true,
       message: `Kupon berhasil diklaim! Anda mendapatkan diskon ${promo.discount}%`,
-      discount: promo.discount,
-      expiresAt: userDiscount.expiresAt
+      discount: promo.discount
     });
 
   } catch (error) {
     console.error('Error claiming coupon:', error);
-    res.status(500).json({ error: 'Terjadi kesalahan server' });
-  }
-});
-
-// Get active discount untuk user
-app.get('/api/user-discount/:userId', (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    const discountData = loadUserDiscounts();
-    const now = new Date();
-    
-    const activeDiscount = discountData.discounts.find(d => 
-      d.userId === userId && 
-      !d.isUsed && 
-      new Date(d.expiresAt) > now
-    );
-
-    if (activeDiscount) {
-      res.json({
-        success: true,
-        hasDiscount: true,
-        discount: activeDiscount
-      });
-    } else {
-      res.json({
-        success: true,
-        hasDiscount: false
-      });
-    }
-  } catch (error) {
-    console.error('Error getting user discount:', error);
-    res.status(500).json({ error: 'Terjadi kesalahan server' });
-  }
-});
-
-// Mark discount as used
-app.post('/api/use-discount', (req, res) => {
-  const { discountId } = req.body;
-
-  try {
-    const discountData = loadUserDiscounts();
-    const discount = discountData.discounts.find(d => d.id === discountId);
-    
-    if (discount) {
-      discount.isUsed = true;
-      discount.usedAt = new Date().toISOString();
-      saveUserDiscounts(discountData);
-      
-      res.json({
-        success: true,
-        message: 'Diskon berhasil digunakan'
-      });
-    } else {
-      res.status(404).json({ error: 'Diskon tidak ditemukan' });
-    }
-  } catch (error) {
-    console.error('Error using discount:', error);
     res.status(500).json({ error: 'Terjadi kesalahan server' });
   }
 });
@@ -763,48 +436,17 @@ async function createAdminPanel(username) {
   }
 }
 
-// Create order dengan diskon
+// Create order
 app.post('/api/create-order', async (req, res) => {
-  const { productType, username, isAdminPanel = false, userId, applyDiscount = false } = req.body;
+  const { productType, username, isAdminPanel = false } = req.body;
 
   if (!productType || !username) {
     return res.status(400).json({ error: 'Product type and username are required' });
   }
 
-  const originalPrice = settings.prices[productType];
-  if (!originalPrice) {
+  const finalPrice = settings.prices[productType];
+  if (!finalPrice) {
     return res.status(400).json({ error: 'Invalid product type' });
-  }
-
-  let finalPrice = originalPrice;
-  let discountApplied = 0;
-  let discountId = null;
-
-  if (applyDiscount && userId) {
-    try {
-      const discountData = loadUserDiscounts();
-      const now = new Date();
-      
-      const activeDiscount = discountData.discounts.find(d => 
-        d.userId === userId && 
-        !d.isUsed && 
-        new Date(d.expiresAt) > now
-      );
-
-      if (activeDiscount) {
-        discountApplied = Math.round(originalPrice * (activeDiscount.discountPercent / 100));
-        finalPrice = originalPrice - discountApplied;
-        discountId = activeDiscount.id;
-        
-        activeDiscount.isUsed = true;
-        activeDiscount.usedAt = new Date().toISOString();
-        saveUserDiscounts(discountData);
-
-        console.log(`💰 DISCOUNT APPLIED: ${activeDiscount.discountPercent}% - Rp ${discountApplied}`);
-      }
-    } catch (discountError) {
-      console.error('Error applying discount:', discountError);
-    }
   }
 
   try {
@@ -853,31 +495,13 @@ app.post('/api/create-order', async (req, res) => {
 
     const transactionId = info.id || `TEMP_${Date.now()}`;
 
-    if (userId) {
-      try {
-        const userData = loadUserData();
-        const user = userData.users.find(user => user.id === userId);
-        if (user) {
-          user.orderCount = (user.orderCount || 0) + 1;
-          user.totalSpent = (user.totalSpent || 0) + finalPrice;
-          saveUserData(userData);
-        }
-      } catch (userError) {
-        console.error('Error updating user data:', userError);
-      }
-    }
-
     activeTransactions.set(transactionId, {
       id: transactionId,
       reff,
       productType,
       username,
       isAdminPanel,
-      originalPrice,
       finalPrice,
-      discountApplied,
-      discountId,
-      userId: userId || null,
       status: 'pending',
       createdAt: new Date(),
       atlanticId: info.id,
@@ -907,9 +531,7 @@ app.post('/api/create-order', async (req, res) => {
       reff,
       productType,
       username,
-      originalPrice,
       finalPrice,
-      discountApplied,
       qrImage,
       qrString: info.qr_string || info.qr_image || '',
       expiresAt: info.expired_at || new Date(Date.now() + 10 * 60 * 1000).toISOString(),
@@ -995,13 +617,8 @@ app.post('/api/check-payment-status', async (req, res) => {
         let telegramMessage = `✅ PEMBAYARAN BERHASIL!\n\n` +
           `👤 User: ${transaction.username}\n` +
           `🎯 Produk: ${transaction.productType}\n` +
-          `💰 Total: Rp ${transaction.finalPrice.toLocaleString('id-ID')}\n`;
-
-        if (transaction.discountApplied > 0) {
-          telegramMessage += `🎫 Diskon: Rp ${transaction.discountApplied.toLocaleString('id-ID')}\n`;
-        }
-
-        telegramMessage += `📝 Tipe: ${transaction.isAdminPanel ? 'Admin Panel' : 'User Panel'}\n` +
+          `💰 Total: Rp ${transaction.finalPrice.toLocaleString('id-ID')}\n` +
+          `📝 Tipe: ${transaction.isAdminPanel ? 'Admin Panel' : 'User Panel'}\n` +
           `🆔 Ref: ${transaction.reff}`;
 
         bot.sendMessage(settings.adminTelegramId, telegramMessage, { parse_mode: 'Markdown' });
@@ -1178,20 +795,20 @@ setInterval(async () => {
 // Clean up expired discounts
 setInterval(() => {
   try {
-    const discountData = loadUserDiscounts();
+    const promoData = loadPromoCodes();
     const now = new Date();
     
-    const activeDiscounts = discountData.discounts.filter(d => 
-      new Date(d.expiresAt) > now
+    const activePromos = promoData.promos.filter(p => 
+      new Date(p.expiresAt) > now
     );
     
-    if (activeDiscounts.length !== discountData.discounts.length) {
-      discountData.discounts = activeDiscounts;
-      saveUserDiscounts(discountData);
-      console.log(`🧹 Cleaned up expired discounts`);
+    if (activePromos.length !== promoData.promos.length) {
+      promoData.promos = activePromos;
+      savePromoCodes(promoData);
+      console.log(`🧹 Cleaned up expired promos`);
     }
   } catch (error) {
-    console.error('Error cleaning up discounts:', error);
+    console.error('Error cleaning up promos:', error);
   }
 }, 24 * 60 * 60 * 1000);
 
